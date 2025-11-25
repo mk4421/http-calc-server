@@ -26,6 +26,12 @@ int main(int argc, char *argv[])
     if (sfd == -1)
         handle_error("socket");
 
+    // SO_REUSEADDRを有効化
+    // 再起動時のbind: Address already in useエラーを防ぐ
+    int opt = 1;
+    if (setsockopt(sfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
+        handle_error("setsockopt");
+
     // サーバーの設定
     memset(&my_addr, 0, sizeof(my_addr));
     my_addr.sin_family = AF_INET;
@@ -46,7 +52,16 @@ int main(int argc, char *argv[])
     cfd = accept(sfd, (struct sockaddr *)&peer_addr, &peer_addr_size);
     if (cfd == -1)
         handle_error("accept");
-    // クライアントへレスポンスを返す
-    char *message = "OK";
-    write(cfd, message, strlen(message));
+
+    // クライアントへレスポンスを読む
+    char request[1024];
+    ssize_t num_bytes = read(cfd, request, sizeof(request) - 1);
+    if (num_bytes == -1) {
+        handle_error("failed to read request");
+    }
+    if (num_bytes != 0) {
+        request[num_bytes] = '\0';
+    }
+    // クライアントからのメッセージをそのままエコーする
+    write(cfd, request, strlen(request));
 }
