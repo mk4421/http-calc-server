@@ -16,12 +16,6 @@
         exit(EXIT_FAILURE); \
     } while (0)
 
-typedef struct
-{
-    char key[64];
-    char value[64];
-} keyValue;
-
 int main(int argc, char *argv[])
 {
     int fd;
@@ -47,18 +41,7 @@ int main(int argc, char *argv[])
         "%s %s",
         argv[1], argv[2]
     );
-    /* TODO: サーバーのコードにパースしてvalidationするコードを書く
-    if (strcmp(argv[1], "GET") != 0) {
-        perror("http methods other than GET is unavailable");
-    }
-    char *pathQuery = argv[2];
-    char *path = strtok(pathQuery, '?');
-    char *query = strtok(pathQuery, '?');
-    if (query != NULL) {
-        char *keyValue = strtok(query, '&');
-        while
-    }
-　　*/
+    
     // ソケットを作成する
     // AF_INET: IPV4を使う
     // SOCK_STREAM: TCPを使う
@@ -70,7 +53,7 @@ int main(int argc, char *argv[])
     memset(&peer_addr, 0, sizeof(peer_addr));
     peer_addr.sin_family = AF_INET;
     peer_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-    peer_addr.sin_port = 12345;
+    peer_addr.sin_port = htons(12345);
 
     // サーバーに接続
     if (connect(fd, (struct sockaddr *)&peer_addr, sizeof(peer_addr)) == -1)
