@@ -256,7 +256,7 @@ void handle_client(int cfd)
 
     // 結果をレスポンスとして送信
     char result_str[64];
-    snprintf(result_str, sizeof(result_str), "%d\n", result);
+    snprintf(result_str, sizeof(result_str), "%d\r\n", result);
 
     char response[1024];
     snprintf(response, sizeof(response),
