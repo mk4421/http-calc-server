@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 
 #define LISTEN_BACKLOG 50
 
@@ -14,6 +15,73 @@
         perror(msg);        \
         exit(EXIT_FAILURE); \
     } while (0)
+
+// 数式を計算する関数（整数のみ、負の数なし）
+// 戻り値: 成功時は0、エラー時は-1
+int calculate(const char *expression, int *result) {
+    int num1 = 0, num2 = 0;
+    char operator = '\0';
+    int i = 0;
+    
+    // 最初の数値を読み取る
+    if (!isdigit(expression[i])) {
+        return -1;  // 数字がない
+    }
+    
+    while (isdigit(expression[i])) {
+        num1 = num1 * 10 + (expression[i] - '0');
+        i++;
+    }
+    
+    // 演算子を読み取る
+    if (expression[i] == '+' || expression[i] == '-' || 
+        expression[i] == '*' || expression[i] == '/') {
+        operator = expression[i];
+        i++;
+    } else {
+        return -1;  // 演算子がない
+    }
+    
+    // 2番目の数値を読み取る
+    if (!isdigit(expression[i])) {
+        return -1;  // 数字がない
+    }
+    
+    while (isdigit(expression[i])) {
+        num2 = num2 * 10 + (expression[i] - '0');
+        i++;
+    }
+    
+    // 式の終わりまで読んだか確認
+    if (expression[i] != '\0') {
+        return -1;  // 余分な文字がある
+    }
+    
+    // 計算を実行
+    switch (operator) {
+        case '+':
+            *result = num1 + num2;
+            break;
+        case '-':
+            *result = num1 - num2;
+            break;
+        case '*':
+            *result = num1 * num2;
+            break;
+        case '/':
+            if (num2 == 0) {
+                return -1;  // ゼロ除算
+            }
+            *result = num1 / num2;
+            break;
+        default:
+            return -1;
+    }
+    
+    return 0;
+}
+
+    
 
 // エラーレスポンスを送信する関数
 void send_error_response(int cfd, int status_code, const char *reason_phrase) {
@@ -195,16 +263,30 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    // 1+2のようなqueryパラメータの値の数式を解釈して計算結果を出す。
+        // 数式を計算
+    int result;
+    if (calculate(v, &result) != 0) {
+        send_error_response(cfd, 400, "Bad Request: Invalid expression");
+        close(cfd);
+        close(sfd);
+        return EXIT_FAILURE;
+    }
 
-    // 成功レスポンス
-    const char *response = "HTTP/1.1 200 OK\r\n"
-                          "Content-Type: text/plain\r\n"
-                          "Content-Length: 2\r\n"
-                          "\r\n"
-                          "OK";
-    write(cfd, response, strlen(response));
+    // 結果をレスポンスとして送信
+    char result_str[64];
+    snprintf(result_str, sizeof(result_str), "%d", result);
     
+    char response[1024];
+    snprintf(response, sizeof(response),
+        "HTTP/1.1 200 OK\r\n"
+        "Content-Type: text/plain\r\n"
+        "Content-Length: %lu\r\n"
+        "Connection: close\r\n"
+        "\r\n"
+        "%s",
+        strlen(result_str),
+        result_str);
+    write(cfd, response, strlen(response));
     close(cfd);
     close(sfd);
     return EXIT_SUCCESS;
