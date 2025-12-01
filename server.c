@@ -1,11 +1,17 @@
-#include <stdio.h>
+// 標準Cライブラリ
+#include <ctype.h>      // isdigit()
+#include <stdio.h>      // printf(), snprintf()
+#include <stdlib.h>     // exit(), EXIT_FAILURE
+#include <string.h>     // memset(), strlen(), strncpy(), strstr(), strcmp()
+#include <strings.h>    // strcasecmp()
 
-#include <sys/socket.h> // socklen_t
-#include <netinet/in.h> // sockaddr_in
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <ctype.h>
+// ネットワーク関連
+#include <arpa/inet.h>  // htons(), ntohs()
+#include <netinet/in.h> // sockaddr_in, INADDR_ANY
+#include <sys/socket.h> // socket(), bind(), listen(), accept(), setsockopt()
+
+// POSIX
+#include <unistd.h>     // read(), write(), close()
 
 #define LISTEN_BACKLOG 50
 

@@ -1,12 +1,15 @@
-#include <stdio.h>
+// 標準Cライブラリ
+#include <stdio.h>      // printf(), fprintf(), snprintf()
+#include <stdlib.h>     // exit(), EXIT_FAILURE, EXIT_SUCCESS
+#include <string.h>     // memset(), strlen()
 
-#include <sys/socket.h> // socklen_t
+// ネットワーク関連
+#include <arpa/inet.h>  // inet_addr(), htons()
 #include <netinet/in.h> // sockaddr_in
-#include <arpa/inet.h>  // inet_addr
-#include <unistd.h>     // read, write, close
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include <sys/socket.h> // socket(), connect()
+
+// POSIX
+#include <unistd.h>     // read(), write(), close()
 
 #define handle_error(msg)   \
     do                      \
